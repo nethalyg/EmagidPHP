@@ -1,5 +1,5 @@
 <?php 
-namespace Emagid;
+namespace Emagid{
 
 
 
@@ -7,6 +7,16 @@ namespace Emagid;
 * Base class for eMagid libraries 
 */
 class Emagid{
+
+	/** 
+	* @var String base path
+	*/ 
+	public $base_path = '/' ;
+
+	/**
+	* @var Array list of folders to include 
+	*/
+	public $include_paths = [];
 
 	/**
 	* @var an object that contains the connection string parameters (db_name, username, password, host)
@@ -17,11 +27,20 @@ class Emagid{
 
 	/**
 	* Defualt constructor 
+	*
+	* $params Array basic settings, such as directories, DB connection etc... 
 	*/
-	public function __construct(){
-		$this->connection_string = new \stdClass;
-		$this->loadLibraries();
+	public function __construct($params = []){
 
+		$this->connection_string = new \stdClass;
+		
+
+		if(count($params)>0)
+			$this->readParams($params);
+
+		$this->loadLibraries($this->base_path.'libs/Emagid', false);
+
+		
 		
 
 		global $emagid ;
@@ -30,18 +49,86 @@ class Emagid{
 	}
 
 
+
+	/**
+	* Breaks the parameters from the constructor into local variables.
+	*/
+	private function readParams($params){
+		foreach ($params as $key => $value) {
+			if(is_array($value)){
+				$this->{$key} = $this->array_to_object($value);
+			}else{
+				$this->{$key} = $value;
+			}
+			
+		}
+
+
+	}
+
+	/** 
+	* convert an array to an object 
+	*
+	* @param Array
+	* @return strClass 
+	*/
+	private function array_to_object($array) {
+	  $obj = new \stdClass;
+
+	  foreach($array as $k => $v) {
+	     if(is_array($v)) {
+	        $obj->{$k} = $this->array_to_object($v); //RECURSION
+	     } else {
+	        $obj->{$k} = $v;
+	     }
+	  }
+
+	  return $obj;
+	} 
+
+
+	/**
+	* Include libraries outside the emagid library 
+	* 
+	* @param $arr Array - array of include files, will override the default class config
+	*/
+	public function loadIncludes($arr = null ){
+		if(isset($arr) && $arr != null){
+			$this->include_paths = $arr;
+		}
+
+		foreach($this->include_paths as $folder ){
+
+
+			$this->loadLibraries($folder);
+			
+		}
+
+	}
+
+
 	/**
 	* Load the eMagid libraries 
 	*/
-	function loadLibraries(){
-		$libraries = [
-			'DB\db.php'
-			//, 'Page\page.php'
-		];
+	function loadLibraries($folder , $loadFiles = true){
 
-		foreach($libraries as $lib ){
-			
-			require_once($lib);
+		if ($handle = opendir($_SERVER["DOCUMENT_ROOT"].$folder)) {
+		    /* Loop through directories  */
+		    while (false !== ($entry = readdir($handle))) {
+		    	if(!$this->startsWith($entry,'.')){ // skip git folders, up folder,etc... 
+		    	
+			    	if(stristr($entry,".php") ){
+			    		if($loadFiles){ // load all files in the current directory
+			    			require_once($_SERVER['DOCUMENT_ROOT'].$folder."/".$entry);
+			    		}
+			    	} else { // it's a folder
+			    			$this->loadLibraries($folder."/".$entry); // recursion 
+			    	}
+		        
+				}
+		    }
+
+		    closedir($handle);
 		}
 	}
 
@@ -56,6 +143,15 @@ class Emagid{
 
 	}
 
-}
 
+
+	function startsWith($haystack,$needle,$case=true){
+		if($case)
+       		return strpos($haystack, $needle, 0) === 0;
+
+   		return stripos($haystack, $needle, 0) === 0;
+	}
+
+}
+}
 ?>
