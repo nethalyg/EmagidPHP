@@ -1,5 +1,5 @@
 <?php 
-namespace Emagid;
+namespace Emagid{
 
 
 
@@ -7,6 +7,11 @@ namespace Emagid;
 * Base class for eMagid libraries 
 */
 class Emagid{
+
+	/** 
+	* @var String base path
+	*/ 
+	public $base_path = '/' ;
 
 	/**
 	* @var Array list of folders to include 
@@ -22,11 +27,18 @@ class Emagid{
 
 	/**
 	* Defualt constructor 
+	*
+	* $params Array basic settings, such as directories, DB connection etc... 
 	*/
-	public function __construct(){
-		$this->connection_string = new \stdClass;
-		$this->loadLibraries('/libs/Emagid', false);
+	public function __construct($params = []){
 
+		$this->connection_string = new \stdClass;
+		
+
+		if(count($params)>0)
+			$this->readParams($params);
+
+		$this->loadLibraries($this->base_path.'libs/Emagid', false);
 
 		
 		
@@ -35,6 +47,44 @@ class Emagid{
 
 
 	}
+
+
+
+	/**
+	* Breaks the parameters from the constructor into local variables.
+	*/
+	private function readParams($params){
+		foreach ($params as $key => $value) {
+			if(is_array($value)){
+				$this->{$key} = $this->array_to_object($value);
+			}else{
+				$this->{$key} = $value;
+			}
+			
+		}
+
+
+	}
+
+	/** 
+	* convert an array to an object 
+	*
+	* @param Array
+	* @return strClass 
+	*/
+	private function array_to_object($array) {
+	  $obj = new \stdClass;
+
+	  foreach($array as $k => $v) {
+	     if(is_array($v)) {
+	        $obj->{$k} = $this->array_to_object($v); //RECURSION
+	     } else {
+	        $obj->{$k} = $v;
+	     }
+	  }
+
+	  return $obj;
+	} 
 
 
 	/**
@@ -62,14 +112,14 @@ class Emagid{
 	*/
 	function loadLibraries($folder , $loadFiles = true){
 
-		if ($handle = opendir($_SERVER["DOCUMENT_ROOT"]	.$folder)) {
+		if ($handle = opendir($_SERVER["DOCUMENT_ROOT"].$folder)) {
 		    /* Loop through directories  */
 		    while (false !== ($entry = readdir($handle))) {
 		    	if(!$this->startsWith($entry,'.')){ // skip git folders, up folder,etc... 
 		    	
 			    	if(stristr($entry,".php") ){
 			    		if($loadFiles){ // load all files in the current directory
-			    			require_once($folder."/".$entry);
+			    			require_once($_SERVER['DOCUMENT_ROOT'].$folder."/".$entry);
 			    		}
 			    	} else { // it's a folder
 			    			$this->loadLibraries($folder."/".$entry); // recursion 
@@ -103,5 +153,5 @@ class Emagid{
 	}
 
 }
-
+}
 ?>
