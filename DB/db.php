@@ -33,6 +33,11 @@ abstract class Db{
 	*/
 	public $id = 0 ;
 
+	/**
+	* @var Array relationships with other tables
+	*/
+	public $relationships = []  ;
+
 
 	/**
 	* Get or creates the db object
@@ -59,45 +64,7 @@ abstract class Db{
 	}
 
 
-	/** 
-	* convert an array to an object 
-	*
-	* @param Array
-	* @return strClass 
-	*/
-	private function array_to_object($array) {
-	  $obj = new stdClass;
-
-	  foreach($array as $k => $v) {
-	     if(is_array($v)) {
-	        $obj->{$k} = $this->array_to_object($v); //RECURSION
-	     } else {
-	        $obj->{$k} = $v;
-	     }
-	  }
-
-	  return $obj;
-	} 
-
-	/** 
-	* convert object to an array
-	*
-	* @param $data Object 
-	* @return Array named array 
-	*/
-	private function object_to_array($data)
-	{
-	    if (is_array($data) || is_object($data))
-	    {
-	        $result = array();
-	        foreach ($data as $key => $value)
-	        {
-	            $result[$key] = $this->object_to_array($value);
-	        }
-	        return $result;
-	    }
-	    return $data;
-	}
+	
 
 
 
@@ -114,7 +81,53 @@ abstract class Db{
 
 		$sql = "SELECT * FROM $this->table_name";
 
-		return $db->get_results($sql);
+		if(isset($params['where'])){ // apply where conditions
+			$sql.=$this->buildWhere($params['where']);
+		}
+
+		$list =  $db->get_results($sql);
+
+
+		foreach($list as $item){
+
+			$this->loadRelationShips($item);
+		}
+
+		return $list;
+	}
+
+
+	private function loadRelationShips(&$object){
+		$db = $this->getConnection(); 
+
+		foreach($this->relationships as $relationship){
+			$local_id = $object->{$relationship['local']};
+
+			$sql = sprintf("SELECT * FROM %s WHERE %s=%s", 
+					$relationship['table_name'] , 
+					$relationship['remote'],
+					$local_id
+
+					);
+
+			
+			if(isset($relationship['relationship_type']) && $relationship['relationship_type']=='many' )
+				$list = $db->get_results($sql); 
+			else 
+				$list = $db->get_row($sql); 
+			$object->{$relationship['name']} = $list;
+		}
+	}
+
+
+	function buildWhere($where){
+		$arr = [] ; 
+
+		foreach($where as $key=>$val ){
+			array_push(sprintf("(%s='%s')", $key,$val));
+		}
+
+		return implode(" AND ", $arr);
 	}
 
 
@@ -138,7 +151,7 @@ abstract class Db{
 		if(count($row)>0){
 			// assign the values to the current object. 
 			// required for the update/insert functionality .
-			$arr = $this->object_to_array($row);
+			$arr = object_to_array($row);
 			
 			foreach($arr as $key => $val){
 				$this->{$key}=$val;
@@ -165,7 +178,7 @@ abstract class Db{
 	  $db=$this->db; ; 
 		
 		
-		$vals = $this->object_to_array($this);
+		$vals = object_to_array($this);
 		
 		// array used for update 
 		$update = array(); 
