@@ -42,11 +42,34 @@ class Form {
 
 	}
 
+	function datePickerFor($field_name, $htmlObjects = []){
+		if(!isset($htmlObjects['type']))
+		{
+			$htmlObjects['type'] = 'text';	
+		}
+
+		$html = sprintf("<input id=\"datepicker\" name=\"%s\"", $field_name);
+
+		foreach($htmlObjects as $key=>$val){
+			$html.=sprintf(" %s=\"%s\"", $key,$val);
+		}
+
+		if(isset($this->model->{$field_name})){
+			$html.= sprintf(" value=\"%s\"", $this->model->{$field_name});
+		}
+
+		$html.=" />";
+
+		return $html;
+
+
+	}
+
 
 	function textAreaFor($field_name, $htmlObjects = []){
 		
 
-		$html = sprintf("<textarea name=\"%s\"", $field_name);
+		$html = sprintf("<textarea class=\"ckeditor\" name=\"%s\"", $field_name);
 
 		foreach($htmlObjects as $key=>$val){
 			$html.=sprintf(" %s=\"%s\"", $key,$val);
@@ -68,7 +91,15 @@ class Form {
 
 
 
-	function dropDownListFor($field_name, $options = [], $label , $htmlObjects = []){
+	/**
+	* Create a dropdownlist, supports associative, unassociative and a strong typed arrays for value 
+	* 
+	* @param String $field_name name of the field 
+	* @param Array options  options for the select box
+	* 
+	* @todo Create documentation for the possible arrays for options 
+	*/
+	function dropDownListFor($field_name, $options = [], $label ='' , $htmlObjects = []){
 		
 
 		$html = sprintf("<select name=\"%s\"", $field_name);
@@ -94,6 +125,19 @@ class Form {
 
 				$html.= sprintf("<option value=\"%s\" %s>%s</option>",$key,$selected, $value);
 			}
+		}else if(is_array($options[0])){
+			foreach($options[0] as $optionValue){
+				$kfield = $options[1];
+				$vfield = $options[2];
+
+				$key = $optionValue->{$kfield};
+				$value = $optionValue->{$vfield};
+
+				$selected = $value == $val?"selected=\"selected\"":"";
+
+				$html.= sprintf("<option value=\"%s\" %s>%s</option>",$key,$selected, $value);
+			}
+
 		}else{
 			foreach($options as $value){
 				$selected = $value == $val?"selected=\"selected\"":"";

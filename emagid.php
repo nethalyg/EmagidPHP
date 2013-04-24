@@ -1,5 +1,6 @@
 <?php 
-namespace Emagid{
+namespace Emagid;
+
 
 
 
@@ -7,6 +8,11 @@ namespace Emagid{
 * Base class for eMagid libraries 
 */
 class Emagid{
+
+	/** 
+	* @var Determine whether to include debug module or not .
+	*/ 
+	public $debug = false ;
 
 	/** 
 	* @var String base path
@@ -40,7 +46,9 @@ class Emagid{
 
 		$this->loadLibraries($this->base_path.'libs/Emagid', false);
 
-		
+		if($this->debug){ // load kint for debugging 
+			require_once($_SERVER['DOCUMENT_ROOT'].$this->base_path.'libs/Emagid/_includes/kint/Kint.class.php');
+		}
 		
 
 		global $emagid ;
@@ -115,7 +123,7 @@ class Emagid{
 		if ($handle = opendir($_SERVER["DOCUMENT_ROOT"].$folder)) {
 		    /* Loop through directories  */
 		    while (false !== ($entry = readdir($handle))) {
-		    	if(!$this->startsWith($entry,'.')){ // skip git folders, up folder,etc... 
+		    	if(!startsWith($entry,'.') && !startsWith($entry,'_')){ // skip git folders, up folder,etc... 
 		    	
 			    	if(stristr($entry,".php") ){
 			    		if($loadFiles){ // load all files in the current directory
@@ -132,19 +140,21 @@ class Emagid{
 		}
 	}
 
-	/**
+	
+
+
+
+	
+
+}
+
+
+
+/** 
+	* Checks whether a strings starts with a specific string.
 	*
-	* Load all the files in a folder
-	* 
-	* @param $folder string path to the folder 
+	* @todo Move this function to functions.inc.php
 	*/
-	function loadFolder($folder){
-		
-
-	}
-
-
-
 	function startsWith($haystack,$needle,$case=true){
 		if($case)
        		return strpos($haystack, $needle, 0) === 0;
@@ -152,6 +162,6 @@ class Emagid{
    		return stripos($haystack, $needle, 0) === 0;
 	}
 
-}
-}
+
+
 ?>
