@@ -51,7 +51,7 @@ class Form {
 		$html = sprintf("<input id=\"datepicker\" name=\"%s\"", $field_name);
 
 		foreach($htmlObjects as $key=>$val){
-			$html.=sprintf(" %s=\"%s\"", $key,$val);
+			$html.=sprintf(" %s=\"%s\"", $key, $val);
 		}
 
 		if(isset($this->model->{$field_name})){
@@ -132,8 +132,8 @@ class Form {
 
 				$key = $optionValue->{$kfield};
 				$value = $optionValue->{$vfield};
-
-				$selected = $value == $val?"selected=\"selected\"":"";
+				
+				$selected = $key == $val?"selected=\"selected\"":"";
 
 				$html.= sprintf("<option value=\"%s\" %s>%s</option>",$key,$selected, $value);
 			}
