@@ -44,7 +44,7 @@ abstract class Db{
 	* 
 	* @return Object - the db object.
 	*/
-	private function getConnection (){
+	protected function getConnection (){
 
 		global $emagid ;
 
@@ -171,6 +171,14 @@ abstract class Db{
 		$db = $this->getConnection();
 		$sql = "DELETE FROM $this->table_name WHERE $this->fld_id=".$id;
 		$db->query($sql);
+	}
+
+
+	function get_row($sql){
+		$db = $this->getConnection();
+
+
+		return $db->get_row($sql);
 	}
 
 	/**
