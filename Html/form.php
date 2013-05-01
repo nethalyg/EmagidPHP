@@ -68,6 +68,33 @@ class Form {
 
 	}
 
+	function multicheckBoxFor($field_name, $cbval ,$htmlObjects = []){
+		if(!isset($htmlObjects['type']))
+		{
+			$htmlObjects['type'] = 'checkbox';	
+		}
+
+		$html = sprintf("<input name=\"%s\"", $field_name);
+
+		foreach($htmlObjects as $key=>$val){
+			
+				$html.=sprintf(" %s=\"%s\"" , $key,$val);
+		}
+
+			$checked =  explode(",", $this->model->{$field_name});
+			
+			$selected = in_array($cbval, $checked)?"checked=\"checked\"":"";
+			$html.= sprintf(" value=\"%s\" %s", $cbval,$selected);
+		
+
+		$html.=" />";
+
+		return $html;
+
+
+	}
+
+
 	function textAreaFor($field_name, $htmlObjects = []){
 		
 
