@@ -30,6 +30,12 @@ class Emagid{
 	public $connection_string;
 
 
+	/**
+	* @var Object \Emagid\Mvc\Conroller.
+	*/
+	public $controller ;
+
+
 
 	/**
 	* Defualt constructor 
@@ -119,10 +125,15 @@ class Emagid{
 	* Load the eMagid libraries 
 	*/
 	function loadLibraries($folder , $loadFiles = true){
+<<<<<<< HEAD
             
+=======
+
+>>>>>>> refs/remotes/cj/master
 		if ($handle = opendir($folder)) {
 		    /* Loop through directories  */
 		    while (false !== ($entry = readdir($handle))) {
+
 		    	if(!startsWith($entry,'.') && !startsWith($entry,'_')){ // skip git folders, up folder,etc... 
 		    	
 			    	if(stristr($entry,".php") ){
@@ -150,7 +161,7 @@ class Emagid{
 
 
 
-/** 
+	/** 
 	* Checks whether a strings starts with a specific string.
 	*
 	* @todo Move this function to functions.inc.php
