@@ -6,12 +6,6 @@ namespace Emagid\Db;
 */
 abstract class Db{
 
-
-	/**
-	* @var holds loaded data, to support defered/  lazy loading 
-	*/
-	private $data = array();
-
 	/**
 	* @var object - private db object, should be created once per instance of the encasing object.
 	*/
@@ -88,42 +82,49 @@ abstract class Db{
 		$sql = "SELECT * FROM $this->table_name";
 
 		if(isset($params['where'])){ // apply where conditions
-			$sql.=" WHERE ". $this->buildWhere($params['where']);
+			$sql.=$this->buildWhere($params['where']);
 		}
 
-		if(isset($params['limit'])){
-			$sql.= " LIMIT ".$params['limit'];
-		}
+		$list =  $db->get_results($sql);
 
-		 $dbList = $db->get_results($sql); 
 
-			$list = [] ;
-		if($dbList && count($dbList)){
+		foreach($list as $item){
 
-			$cls = get_class($this); 
-
-			foreach( $dbList  as $item){
-				$obj = new $cls ; 
-
-				clone_into($item, $obj);
-
-				array_push($list, $obj);
-
-			}
-
+			$this->loadRelationShips($item);
 		}
 
 		return $list;
 	}
 
 
+	private function loadRelationShips(&$object){
+		$db = $this->getConnection(); 
+
+		foreach($this->relationships as $relationship){
+			$local_id = $object->{$relationship['local']};
+
+			$sql = sprintf("SELECT * FROM %s WHERE %s=%s", 
+					$relationship['table_name'] , 
+					$relationship['remote'],
+					$local_id
+
+					);
+
+			
+			if(isset($relationship['relationship_type']) && $relationship['relationship_type']=='many' )
+				$list = $db->get_results($sql); 
+			else 
+				$list = $db->get_row($sql); 
+			$object->{$relationship['name']} = $list;
+		}
+	}
+
 
 	function buildWhere($where){
-
 		$arr = [] ; 
 
 		foreach($where as $key=>$val ){
-			array_push($arr,sprintf("(%s='%s')", $key,$val));
+			array_push(sprintf("(%s='%s')", $key,$val));
 		}
 
 		return implode(" AND ", $arr);
@@ -156,7 +157,7 @@ abstract class Db{
 				$this->{$key}=$val;
 			}
 
-			//$this->loadRelationShips($this);
+			$this->loadRelationShips($this);
 		}
 
 		return $this;
@@ -263,79 +264,6 @@ abstract class Db{
 		foreach($_GET as $key=>$val){
 			$this->{$key} = $val;
 		}
-	}
-
-
-	public function __get($name){
-
-		// check if data was already created 
-		if(isset($this->data[$name]))
-			return $this->data[$name];
-
-
-
-
-		foreach($this->relationships as $relationship){
-
-
-			if($relationship['name'] == $name){
-
-
-				if(isset($relationship['class_name'])){ // creating a strong named object 
-
-					$class = $relationship['class_name'];
-
-					$obj = new $class;
-
-					$local_val = $this->{$relationship['local']};
-
-
-					if($relationship['relationship_type']=='many'){
-						$key = $relationship['remote']; 
-
-						$obj = $obj->getList([
-								'where' => [
-									 $key => $local_val
-								] 
-							]);
-					}else{
-						$obj->getItem($local_val);
-					}
-					
-					$this->data[$name] = $obj;
-					$this->{$name} = $obj;
-
-					return $obj; 
-
-				}else { // creating a generic type 
-
-					$this->{$name} = $this->loadChildren($relationship);
-					$this->data[$name] = $this->loadChildren($relationship);
-
-				}
-				
-			}
-		}
-
-	}
-
-
-	function loadChildren($params){
-		$db = $this->getConnection();
-
-		$table = $params['table_name'];
-		$local = $params['local'];
-		$local_val = $this->{$local}; 
-		$remote = $params['remote'];
-		$relationship_type = $params['relationship_type'];
-
-		if($relationship_type=='many'){
-			return $db->get_results("SELECT * FROM $table WHERE $remote='$local_val'");
-		}else {
-			return $db->get_row("SELECT * FROM $table WHERE $remote='$local_val'");
-			
-		}
-
 	}
 
 

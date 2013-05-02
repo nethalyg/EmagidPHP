@@ -46,19 +46,5 @@
 
 
 
-	function clone_into($source, &$target){
-
-		  foreach($source as $k => $v) {
-		     if(is_array($v)) {
-		        $target->{$k} = array_to_object($v); //RECURSION
-		     } else {
-		        $target->{$k} = $v;
-		     }
-		  }
-
-	}
-
-
-
 	
 ?>
