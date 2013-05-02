@@ -90,7 +90,12 @@ abstract class Db{
 		if(isset($params['where'])){ // apply where conditions
 			$sql.=" WHERE ". $this->buildWhere($params['where']);
 		}
+		
 
+		isset($params['orderBy'])? $orderBy = $params['orderBy'] : $orderBy = "id";
+		isset($params['sort'])? $sort = $params['sort'] : $sort = "ASC";
+		$sql.= " ORDER BY {$orderBy} {$sort}";
+		
 		if(isset($params['limit'])){
 			$sql.= " LIMIT ".$params['limit'];
 		}
@@ -224,7 +229,7 @@ abstract class Db{
 		}
 		
 		
-		
+
 		if($db->query($sql)){
 				return true;
 			}else{
@@ -282,7 +287,7 @@ abstract class Db{
 
 					if($relationship['relationship_type']=='many'){
 						$key = $relationship['remote']; 
-
+						
 						$obj = $obj->getList([
 								'where' => [
 									 $key => $local_val
