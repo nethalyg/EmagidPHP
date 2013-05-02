@@ -46,6 +46,9 @@
 
 
 
+	/**
+	* Clone all the fields from one object into another, both already initialized
+	*/
 	function clone_into($source, &$target){
 
 		  foreach($source as $k => $v) {
@@ -56,6 +59,17 @@
 		     }
 		  }
 
+	}
+
+
+	/**
+	* Simple redirect
+	*
+	* @param string $url 
+	*/
+	function redirect($url){
+		header("Location:".$url);
+		die(); 
 	}
 
 
