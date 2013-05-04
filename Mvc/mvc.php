@@ -2,7 +2,18 @@
 
 namespace Emagid\Mvc;
 
+
+/**
+* @todo : add routing table support
+*/
 class Mvc{
+
+
+
+	/**
+	* @var string site's root, used to determine where the controller starts 
+	*/
+	private static $debug = true; 
 
 
 	/**
@@ -23,6 +34,13 @@ class Mvc{
 	private static $default_view = 'index'; 
 
 
+
+	/**
+	* @var array - routing table allows the user to  add new "translators " for routes
+	*/
+	private static $routes = []; 
+
+
 	/**
 	* Load the Mvc structure
 	* 
@@ -30,7 +48,11 @@ class Mvc{
 	* 		'root' string - the absolute URI of the current site, should always end with '/' (e.g.: '/', '/mysite/')
 	*/
 	public static function load(array $arr = []){
+
 		global $emagid; 
+
+		if($arr['template'])
+			$emagid->template=$arr['template'];
 
 		if(isset($arr['root']))
 			self::$root=$arr['root'];
@@ -49,13 +71,25 @@ class Mvc{
 			$uri = substr($uri, strlen(self::$root)+1);
 		}
 
+		if(self::startsWith($uri, '/')){
+			$uri = substr($uri, 1);
+		}
 
-		$segments = $uri != '' ? explode('/', $uri) : array();
+			
+
+
+
+		$segments = $uri != '' && $uri != '/' ? explode('/', $uri) : array();
+
+
+
 
 		$controller_name = count($segments) >0?$segments[0]:self::$default_controller;
 		$view_name = count($segments)>1?$segments[1]:self::$default_view;
 
-		
+
+
+	
 		// load the controller 
 		require_once($emagid->base_path.'/controllers/'.$controller_name.'.php');
 
@@ -77,6 +111,8 @@ class Mvc{
 
    		return stripos($haystack, $needle, 0) === 0;
 	}
+
+
 	
 }
 

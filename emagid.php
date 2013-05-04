@@ -8,6 +8,11 @@ namespace Emagid;
 * Base class for eMagid libraries 
 */
 class Emagid{
+	/** 
+	* @var Object 
+	* 	page object, will contain SEO , data and other page specific handlers
+	*/ 
+	public $page = null  ;
 
 	/** 
 	* @var Determine whether to include debug module or not .
@@ -35,6 +40,10 @@ class Emagid{
 	*/
 	public $controller ;
 
+	/**
+	* @var string acive template's name
+	*/
+	public $template = null ;
 
 
 	/**
@@ -56,8 +65,7 @@ class Emagid{
 			require_once($this->base_path.'libs/Emagid/_includes/kint/Kint.class.php');
 		}
 		
-
-		global $emagid ;
+		$this->page = new \Emagid\Page\Page(); 
 
 
 	}
