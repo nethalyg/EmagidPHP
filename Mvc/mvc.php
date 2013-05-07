@@ -64,7 +64,17 @@ class Mvc{
 			self::$default_view=$arr['default_view'];
 
 
+
 		$uri = $_SERVER['REQUEST_URI'];
+
+		if(stristr($uri, "?")){
+			$uri_parts = explode("?", $uri); 
+			$uri = $uri_parts[0];
+
+			//$_SERVER['QUERY_STRING'] =$uri_parts[1];
+			self::rebuildQueryString($uri_parts[1]);
+
+		}
 
 
 		if(self::startsWith($uri, self::$root)){
@@ -103,7 +113,6 @@ class Mvc{
 
 		}
 
-		
 		$view_name = count($segments)>1?$segments[1]:self::$default_view;
 
 
@@ -138,6 +147,29 @@ class Mvc{
 		}
 
 		return null; 
+	}
+
+
+
+	/**
+	* Rebuild the querystring 
+	*
+	* @param string $str - the text that comes after the "?" 
+	*/
+	private static function rebuildQueryString ($str){
+		global $_GET; 
+
+		$_GET = [] ;
+
+		foreach (explode("&", $str) as $qs) {
+			$key = explode("=", $qs)[0];
+			$val = explode("=", $qs)[1];
+
+			$_GET[$key] = $val;
+		}
+
+
+
 	}
 
 	/** 
