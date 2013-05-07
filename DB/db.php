@@ -68,6 +68,7 @@ abstract class Db{
 
 		return $this->db;
 	}
+        
 
 
 	
@@ -105,9 +106,9 @@ abstract class Db{
 			}
 			
 			// apply order and sort
-			isset($params['orderBy'])? $orderBy = $params['orderBy'] : $orderBy = "id";
-			isset($params['sort'])? $sort = $params['sort'] : $sort = "ASC";
-			$sql.= " ORDER BY {$orderBy} {$sort}";
+			isset($params['orderBy'])? $orderBy = $params['orderBy'] : $orderBy = "1";
+			//isset($params['sort'])? $sort = $params['sort'] : $sort = "ASC";
+			$sql.= " ORDER BY {$orderBy}";
 			
 			// apply pagination
 			if(isset($params['limit'])){
@@ -351,6 +352,30 @@ abstract class Db{
 		}
 
 	}
+        
+             
+         /**
+         * get the number of elements in a table
+         * @return int  number
+         */
+        function getCount(){
+            $db = $this->getConnection(); 
+
+            $sql = "SELECT COUNT(*) FROM $this->table_name";
+    
+            return $db->get_var($sql);
+        }
+        
+        
+        function getValue($field, $id){
+            $db = $this->getConnection(); 
+
+            $sql = "SELECT $field FROM $this->table_name WHERE $this->fld_id=".$id;
+    
+            return $db->get_var($sql);
+   
+        }
+        
 
 
 }

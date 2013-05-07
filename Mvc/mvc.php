@@ -51,7 +51,7 @@ class Mvc{
 
 		global $emagid; 
 
-		if($arr['template'])
+		if(isset($arr['template']))
 			$emagid->template=$arr['template'];
 
 		if(isset($arr['root']))
@@ -68,7 +68,7 @@ class Mvc{
 
 
 		if(self::startsWith($uri, self::$root)){
-			$uri = substr($uri, strlen(self::$root)+1);
+			$uri = substr($uri, strlen(self::$root));
 		}
 
 		if(self::startsWith($uri, '/')){
