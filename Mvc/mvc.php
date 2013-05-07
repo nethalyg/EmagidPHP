@@ -107,16 +107,8 @@ class Mvc{
 			if(!$view_name)
 				$view_name = self::$default_view;
 			
-
-
-
-
 		}
 
-		$view_name = count($segments)>1?$segments[1]:self::$default_view;
-
-
-	
 		// load the controller 
 		require_once($emagid->base_path.'/controllers/'.$controller_name.'.php');
 
