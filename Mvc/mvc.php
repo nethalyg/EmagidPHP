@@ -83,10 +83,28 @@ class Mvc{
 
 
 
+		$controller_name = self::getAndPop($segments) ; 
 
-		$controller_name = count($segments) >0?$segments[0]:self::$default_controller;
+
+		if(!$controller_name ) {
+				// if controller doesn't exist, view won't exist neigther .
+				$controller_name = self::$default_controller ;
+				$view_name = self::$default_view;
+		}else {
+			// controller exists, might have view definition, and parameters .
+			$view_name = self::getAndPop($segments);
+
+			if(!$view_name)
+				$view_name = self::$default_view;
+			
+
+
+
+
+		}
+
+		
 		$view_name = count($segments)>1?$segments[1]:self::$default_view;
-
 
 
 	
@@ -96,8 +114,30 @@ class Mvc{
 
 		$emagid->controller->name = $controller_name; 
 		$emagid->controller->view = $view_name; 
-		$emagid->controller->$view_name(); 
 
+		call_user_func_array(array(&$emagid->controller, $view_name),$segments);
+
+		//$emagid->controller->$view_name(); 
+
+	}
+
+
+	/**
+	* Get the first element from the array and remove it 
+	*
+	* @param array &$arr reference to the array 
+	*/
+	private static function getAndPop(&$arr ){
+		if(count($arr)){
+			$ret = $arr[0];
+
+			array_shift($arr);
+
+			return $ret ;
+
+		}
+
+		return null; 
 	}
 
 	/** 
